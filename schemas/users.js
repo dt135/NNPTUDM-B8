@@ -66,10 +66,19 @@ userSchema.index({
 })
 
 userSchema.pre('save', function (next) {
+    if (!this.isModified('password')) {
+        if (typeof next === 'function') {
+            return next();
+        }
+        return;
+    }
     let salt = bcrypt.genSaltSync(10);
     this.password = bcrypt.hashSync(
         this.password, salt
     )
+    if (typeof next === 'function') {
+        next();
+    }
 })
 
 module.exports = mongoose.model("user", userSchema);
